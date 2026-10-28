@@ -1007,7 +1007,8 @@ DLLEXPORT size_t tj3JPEGBufSize(int width, int height, int jpegSubsamp)
   mcuw = tjMCUWidth[jpegSubsamp];
   mcuh = tjMCUHeight[jpegSubsamp];
   chromasf = jpegSubsamp == TJSAMP_GRAY ? 0 : 4 * 64 / (mcuw * mcuh);
-  retval = (unsigned long long)PAD(width, mcuw) * PAD(height, mcuh) *
+  retval = PAD((unsigned long long)width, mcuw) *
+           PAD((unsigned long long)height, mcuh) *
            (2ULL + chromasf) + 2048ULL;
 #if ULLONG_MAX > ULONG_MAX
   if (retval > (unsigned long long)((unsigned long)-1))
@@ -1045,8 +1046,8 @@ DLLEXPORT unsigned long TJBUFSIZE(int width, int height)
   /* This allows for rare corner cases in which a JPEG image can actually be
      larger than the uncompressed input (we wouldn't mention it if it hadn't
      happened before.) */
-  retval = (unsigned long long)PAD(width, 16) * PAD(height, 16) * 6ULL +
-           2048ULL;
+  retval = PAD((unsigned long long)width, 16) *
+           PAD((unsigned long long)height, 16) * 6ULL + 2048ULL;
 #if ULLONG_MAX > ULONG_MAX
   if (retval > (unsigned long long)((unsigned long)-1))
     THROWG("Image is too large", (unsigned long)-1);
@@ -2530,7 +2531,7 @@ DLLEXPORT int tj3DecompressToYUV8(tjhandle handle,
   pw0 = tj3YUVPlaneWidth(0, width, this->subsamp);
   ph0 = tj3YUVPlaneHeight(0, height, this->subsamp);
   dstPlanes[0] = dstBuf;
-  strides[0] = PAD(pw0, align);
+  strides[0] = (int)PAD((unsigned long long)pw0, align);
   if (this->subsamp == TJSAMP_GRAY) {
     strides[1] = strides[2] = 0;
     dstPlanes[1] = dstPlanes[2] = NULL;
@@ -2538,7 +2539,7 @@ DLLEXPORT int tj3DecompressToYUV8(tjhandle handle,
     int pw1 = tj3YUVPlaneWidth(1, width, this->subsamp);
     int ph1 = tj3YUVPlaneHeight(1, height, this->subsamp);
 
-    strides[1] = strides[2] = PAD(pw1, align);
+    strides[1] = strides[2] = (int)PAD((unsigned long long)pw1, align);
     if ((unsigned long long)strides[0] * (unsigned long long)ph0 >
         (unsigned long long)INT_MAX ||
         (unsigned long long)strides[1] * (unsigned long long)ph1 >
